@@ -5,16 +5,26 @@
 .cl-wrap .cl-slug {
     color: #888888;
     position: absolute;
-    top: 10%;
+    top: 0px;
     right: 5px;
 }
+.cl-wrap .cl-slug::before {
+  content: '\21DD';
+}
 .cl-wrap .cl-prompt {
-    color: #888888;
+    color: #008000;
     position: absolute;
-    top: 10%;
+    top: 0px;
     left: 5px;
 }
+.cl-wrap .cl-prompt::after {
+    content: '\21DD';
+}
 .cl-wrap input {
-    width: 250px;
+    width: 100%;
     padding-right: 90px;
+    line-height: 18px;
+}
+.cl-wrap .cl-info {
+    color: #888888;   
 }

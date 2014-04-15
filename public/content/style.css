@@ -1,0 +1,19 @@
+#output {
+    border: 2px solid #dcdcdc;
+    background-color: #ebebeb;
+    height: 375px;   
+}
+.cl-wrap {
+    display:block;
+    clear: both;
+    width: 100%;
+}
+.command-wrap {
+    font-size: 1.8em;
+    padding: 10px;
+    background-color: #888888;
+}
+#commandLine {
+    margin: 0;
+     border: 3px solid #888888;   
+}

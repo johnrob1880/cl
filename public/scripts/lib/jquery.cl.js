@@ -17,22 +17,27 @@
                 actions: {
                     'text':  {
                         'commands' : {
+                            'undo': {
+                                'prompts': []
+                            },
+                            'clear': {
+                                'prompts' : ['target']
+                            },
                             'parse' : { 
                                 'exec' : function (e) {
-                                    $(e.target).css({'background-color': e.color});   
+                                    alert($(e.target).text());
                                 },
                                 'prompts' : [
-                                    'target',
-                                    'color'
+                                    'target'
                                 ]
                             },
                             'insert' : { 
                                 'exec' : function (e) {
-                                    console.log(['inserting...', e]);  
+                                    $(e.target).append(e.content);
                                 },
                                 'prompts' : [
                                     'target',
-                                    'color'
+                                    'content'
                                 ]
                             }
                         }
@@ -46,6 +51,16 @@
                                 'prompts': ['target', 'color']
                             }
                         }
+                    },
+                    'product': {
+                        'commands': {
+                            'create' : {
+                                'exec': function (props) {
+                                    $('#output').append('<div>created product: ' + props.name + '</div>');
+                                },
+                                'prompts': ['name', 'price', 'description']
+                            }
+                        }
                     }
                 }
             },
@@ -54,7 +69,9 @@
             currentSuggestion,
             promptMode = false,
             promptIndex = 0,
-            props = {};
+            cache = {},
+            props = {},
+            executed = [];
 
         var opts = $.extend({}, defaults, options);
         
@@ -66,7 +83,6 @@
                 
                 for (var c in opts.actions) {
                     if (opts.actions.hasOwnProperty(c)) {
-                        console.log(c.indexOf(input));
                         if (c.indexOf(input) == 0) {
                             currentSuggestion = c;
                         }
@@ -77,7 +93,6 @@
                 
                 for (var c in activeCommand.commands) {
                     if (activeCommand.commands.hasOwnProperty(c)) {
-                        console.log(c.indexOf(input));
                         if (c.indexOf(input) === 0) {
                             currentSuggestion = c;
                         }
@@ -87,9 +102,9 @@
         };
 
         return this.each(function () {
-            var $this = $(this);        
+            var $this = $(this);
             var $slug = $('<span class="cl-slug"></span>');
-            var $prompt = $('<span class="cl-prompt">action &rArr;</span>');
+            var $prompt = $('<span class="cl-prompt">action</span>');
             var $info = $('<div class="cl-info"></div>');
             $this.wrap('<div class="cl-wrap" />');
             $this.parent().append($prompt);
@@ -98,7 +113,8 @@
             
             var reset = function () {
                 $this.val('');
-                $prompt.html('action &rArr;');
+                $prompt.show();
+                $prompt.html('action');
                 $info.html('');
                 $slug.html('?');
                 activeCommand = undefined;
@@ -115,32 +131,62 @@
                     reset();
                     return;
                 }
+                
                 $prompt.hide();
                 
-               if (e.keyCode === 9) {
+                
+                if (e.keyCode === 38) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var lastAction = executed.pop();
+                    if (lastAction) {
+                        reset();
+                        activeCommandText = lastAction.action;
+                        activeCommand = opts.actions[lastAction.action];
+                        currentSuggestion = lastAction.command;
+                        promptMode = true;
+                        promptIndex = 0;
+                        $prompt.html('').hide();
+                        $this.val('');
+                        $info.html(activeCommandText + ' &raquo; ' + currentSuggestion);
+                        var slug = activeCommand.commands[currentSuggestion].prompts[promptIndex];
+                        $slug.html(slug + ' [' + (cache[slug] || '') + ']');
+                        return;
+                    }
+                }
+                
+               if (e.keyCode === 9 || e.keyCode === 13) {
                    e.preventDefault();
                    e.stopImmediatePropagation();
                    
                    if (!activeCommand) {
-                       if (opts.actions[currentSuggestion]) {
+                       var currAction = opts.actions[currentSuggestion];
+                       if (currAction) {
                         $this.val(currentSuggestion);
-                        activeCommand = opts.actions[currentSuggestion];
+                        activeCommand = currAction;
                         activeCommandText = currentSuggestion;
+//                        var bFunc = typeof currAction.exec === "function";
+//                        if (!currAction.prompts || bFunc) {
+//                         
+//                            $.publish(activeCommandText, []);
+//                            if (bFunc) {
+//                                var lastAction = executed.pop();
+//                                currAction.exec(lastAction);   
+//                            }
+//                            reset();
+//                            return;
+//                        }
+                        
                         $info.html(activeCommandText +  ' &raquo; ');
-                        $prompt.html(activeCommandText + "&rArr; command &rArr;");
+                        $prompt.html("command");
                         $this.val('');
                         $prompt.show();
                        }
                    } else {
                         if (activeCommand.commands[currentSuggestion]) {
-//                            $this.val(currentSuggestion);
-//                            console.log(activeCommand.commands[currentSuggestion]);
-//                            
-                            console.log(['prompt mode', promptMode, promptIndex]);
                             if (promptMode) {
-                                
-                                props[activeCommand.commands[currentSuggestion].prompts[promptIndex]] = $this.val();
-                                    
+                                var slug = activeCommand.commands[currentSuggestion].prompts[promptIndex];
+                                props[slug] = cache[slug] = ($this.val().length > 0 ? $this.val() : (cache[slug] || ''));
                                 $this.val('');
                                 
 
@@ -148,31 +194,44 @@
                                     
                                     $.publish(activeCommandText + '/' + currentSuggestion, props);
                                     
-                                    activeCommand.commands[currentSuggestion].exec(props);
+                                    if (typeof activeCommand.commands[currentSuggestion].exec === "function") {
+                                        activeCommand.commands[currentSuggestion].exec(props);
+                                    }
+                                    executed.push({'action': activeCommandText, 'command': currentSuggestion}); 
                                     reset();
                                 }
                                 else {
                                     promptIndex++;
-                                    $slug.html(activeCommand.commands[currentSuggestion].prompts[promptIndex]);
+                                    slug = activeCommand.commands[currentSuggestion].prompts[promptIndex];
+                                    $slug.html(slug + ' [' + (cache[slug] || '') + ']');
                                     console.log(props);
                                 }
                                 
                                 
                             } else {
+                                var prompts = activeCommand.commands[currentSuggestion].prompts;
+                                
+                                if (typeof prompts === "undefined" || prompts.length === 0) {
+                                    $.publish(activeCommandText + '/' + currentSuggestion, null);
+                                    executed.push({'action': activeCommandText, 'command': currentSuggestion}); 
+                                    reset();
+                                    return;
+                                };
+                                
+                                var slug = activeCommand.commands[currentSuggestion].prompts[0];
                                 $info.html(activeCommandText + '&raquo;' + currentSuggestion);
+                                
                                 promptMode = true;
                                 promptIndex = 0;
                                 $this.val('');
-                                $slug.html(activeCommand.commands[currentSuggestion].prompts[0]);
+                                $slug.html(slug + ' [' + (cache[slug] || '') + ']');
                             }
-                            
                         }
                    }
                }
             });
             
             $this.bind('keyup', function (e) {
-                                               
                 if (!promptMode) {
                     suggest($this.val());
                     $slug.html(currentSuggestion);
