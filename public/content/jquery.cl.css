@@ -1,0 +1,20 @@
+.cl-wrap {    
+    position: relative;
+    float: left;
+}
+.cl-wrap .cl-slug {
+    color: #888888;
+    position: absolute;
+    top: 10%;
+    right: 5px;
+}
+.cl-wrap .cl-prompt {
+    color: #888888;
+    position: absolute;
+    top: 10%;
+    left: 5px;
+}
+.cl-wrap input {
+    width: 250px;
+    padding-right: 90px;
+}
