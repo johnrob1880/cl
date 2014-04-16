@@ -63,6 +63,9 @@ define(['jquery', 'knockout', 'cl'], function ($, ko, CL) {
             console.log(e);
             console.log(['subscribe', props]);
         });
+        
+        $('#commandLine').cl('parse', 'text!insert:#output:Hello');
+        $('#commandLine').cl('parse', 'color!forecolor:#output:#ff0000');
     };
 
     return {
