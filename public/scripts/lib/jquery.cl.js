@@ -200,12 +200,12 @@
         actions: {
             'undo': {
                 'commands': {
-                    'confirm': {}
+                    'confirm [y]': {}
                 }
             },
             'redo': {
                 'commands': {
-                    'confirm': {}                    
+                    'confirm [y]': {}                    
                 }
             }
         }

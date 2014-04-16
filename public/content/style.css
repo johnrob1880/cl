@@ -1,7 +1,8 @@
 #output {
-    border: 2px solid #dcdcdc;
+    border: 3px solid #888888;
     background-color: #ebebeb;
-    height: 375px;   
+    height: 375px;
+    padding-bottom: 20px;
 }
 .cl-wrap {
     display:block;
@@ -9,14 +10,31 @@
     width: 100%;
 }
 .command-wrap {
+    
     font-size: 1.8em;
     padding: 10px;
     background-color: #888888;
 }
+.command-input-wrap {
+    position: relative;   
+}
 #commandLine {
     margin: 0;
-     border: 3px solid #888888;   
+    border: 3px solid #888888;  
+    border-top: 0px;
+    padding-left: 12px;
 }
 .cl-wrap .cl-info {
     color: #000000;   
+}
+.cl-wrap .cl-prompt {
+    color: #008000;
+    position: absolute;
+    top: 0px;
+    left: 20px;
+}
+.cl-caret {
+    position: absolute;
+    top:0px;
+    left: 5px;
 }

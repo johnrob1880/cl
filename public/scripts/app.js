@@ -1,10 +1,10 @@
-define(['jquery', 'knockout', 'cl'], function($, ko, CL) {
-    var start = function() {
-        
+define(['jquery', 'knockout', 'cl'], function ($, ko, CL) {
+    var start = function () {
+
         $('#commandLine').cl({
             'width': '100%',
             'actions': {
-               'text': {
+                'text': {
                     'commands': {
                         'insert': {
                             'exec': function (e) {
@@ -16,29 +16,56 @@ define(['jquery', 'knockout', 'cl'], function($, ko, CL) {
                             ]
                         }
                     }
-               }
+                },
+                'color': {
+                    'commands': {
+                        'forecolor': {
+                            'exec': function (e) {
+                                $(e.target).css({
+                                    'color': e.color
+                                });
+                            },
+                            'prompts': [
+                            'target',
+                            'color'
+                        ]
+                        },
+                        'background': {
+                            'exec': function (e) {
+                                $(e.target).css({
+                                    'backgroundColor': e.color
+                                });
+                            },
+                            'prompts': [
+                            'target',
+                            'color'
+                        ]
+                        }
+                    }
+
+                }
             }
         });
-        
+
         $.subscribe('undo/confirm', function (e, props) {
-           alert('undo'); 
+            alert('undo');
         });
         $.subscribe('redo/confirm', function (e, props) {
-           alert('redo'); 
+            alert('redo');
         });
         $.subscribe('text/undo', function (e) {
             $('#output').html('');
         });
         $.subscribe('text/clear', function (e, props) {
-            $(props.target).html(''); 
+            $(props.target).html('');
         });
         $.subscribe('style/text-color', function (e, props) {
             console.log(e);
             console.log(['subscribe', props]);
         });
     };
-    
+
     return {
-        start: start  
+        start: start
     };
 });
